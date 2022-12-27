@@ -1,3 +1,4 @@
+import 'dart:collection';
 import 'dart:io';
 import 'dart:developer' as devtools;
 
@@ -47,16 +48,25 @@ class _MyHomePageState extends State<MyHomePage> {
     if (Platform.isAndroid) {
       redirectUrl = Uri.parse('w3a://com.example.web3authPoc/auth');
     } else if (Platform.isIOS) {
+      devtools.log('Platform is iOS');
       redirectUrl = Uri.parse('com.example.web3authPoc://openlogin');
     } else {
       throw Exception('Unsupported platform');
     }
 
+    final loginConfig = HashMap<String, LoginConfigItem>();
+    loginConfig['facebook'] = LoginConfigItem(
+      verifier: 'rewired.poc-facebook',
+      typeOfLogin: TypeOfLogin.facebook,
+      name: '____',
+    );
+
     await Web3AuthFlutter.init(
       Web3AuthOptions(
-        clientId: 'BPl7okxKe-j4U6dzaDJE8DtWSAUz6IQ1WDGugfEqO3hz1Dp72x4bpBA0dHY1p6kOHQNil72zUxvlWH-kqnMHd5I',
+        clientId: '____',
         network: Network.testnet,
         redirectUrl: redirectUrl,
+        loginConfig: loginConfig,
       ),
     );
 
@@ -65,10 +75,32 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
+    final size = MediaQuery.of(context).size;
+
     return Scaffold(
       appBar: AppBar(),
-      body: const Center(
-        child: Text('Hello World!'),
+      body: Column(
+        children: [
+          // Create an Elevated Button with Text Login Facebook
+          ElevatedButton(
+            onPressed: () async {
+              try {
+                final response = await Web3AuthFlutter.login(
+                  LoginParams(
+                    loginProvider: Provider.facebook,
+                    redirectUrl: Uri.parse(
+                      'com.example.web3authPoc://openlogin',
+                    ),
+                  ),
+                );
+                devtools.log('Response: $response');
+              } on Exception catch (error) {
+                devtools.log('Error: $error');
+              }
+            },
+            child: const Text('Login Facebook'),
+          ),
+        ],
       ),
     );
   }
