@@ -49,17 +49,35 @@ class _MyHomePageState extends State<MyHomePage> {
       redirectUrl = Uri.parse('w3a://com.example.web3authPoc/auth');
     } else if (Platform.isIOS) {
       devtools.log('Platform is iOS');
-      redirectUrl = Uri.parse('com.example.web3authPoc://openlogin');
+      redirectUrl = Uri.parse('com.example.web3authpoc://openlogin');
     } else {
       throw Exception('Unsupported platform');
     }
 
     final loginConfig = HashMap<String, LoginConfigItem>();
+
     loginConfig['facebook'] = LoginConfigItem(
       verifier: 'rewired.poc-facebook',
       typeOfLogin: TypeOfLogin.facebook,
-      name: '____',
+      name: 'Facebook',
+      clientId: '____',
     );
+
+    loginConfig['google'] = LoginConfigItem(
+      verifier: 'rewired.poc-google',
+      typeOfLogin: TypeOfLogin.google,
+      name: 'Google',
+      clientId: '____',
+    );
+
+    loginConfig['discord'] = LoginConfigItem(
+      verifier: 'rewired.poc-discord',
+      typeOfLogin: TypeOfLogin.discord,
+      name: 'Discord',
+      clientId: '____',
+    );
+
+    // Apple doesn't need a login config item
 
     await Web3AuthFlutter.init(
       Web3AuthOptions(
@@ -75,8 +93,6 @@ class _MyHomePageState extends State<MyHomePage> {
 
   @override
   Widget build(BuildContext context) {
-    final size = MediaQuery.of(context).size;
-
     return Scaffold(
       appBar: AppBar(),
       body: Column(
@@ -85,12 +101,15 @@ class _MyHomePageState extends State<MyHomePage> {
           ElevatedButton(
             onPressed: () async {
               try {
+                await Web3AuthFlutter.logout();
+                devtools.log('Logged out!');
                 final response = await Web3AuthFlutter.login(
                   LoginParams(
                     loginProvider: Provider.facebook,
-                    redirectUrl: Uri.parse(
-                      'com.example.web3authPoc://openlogin',
-                    ),
+                    // This is used for email_passwordless
+                    // extraLoginOptions: ExtraLoginOptions(
+                    //   login_hint: 'blake@rewired.one',
+                    // ),
                   ),
                 );
                 devtools.log('Response: $response');
@@ -98,7 +117,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 devtools.log('Error: $error');
               }
             },
-            child: const Text('Login Facebook'),
+            child: const Text('Login'),
           ),
         ],
       ),
